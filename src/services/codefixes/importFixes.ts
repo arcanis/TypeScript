@@ -912,9 +912,9 @@ namespace ts.codefix {
      * that the runtime has already been executed).
      * @internal
      */
-    function isPnpAvailable() {
+    function isPnpAvailable(path: string) {
         // @ts-ignore
-        return process.versions.pnp;
+        return process.versions.pnp && getPnpApi().findPackageLocator(`${path}/`) !== null ? true : false;
     }
 
     function getPnpApi() {
@@ -953,7 +953,7 @@ namespace ts.codefix {
     }
 
     function isImportablePath(fromPath: string, toPath: string, getCanonicalFileName: GetCanonicalFileName, globalCachePath?: string): boolean {
-        if (isPnpAvailable()) {
+        if (isPnpAvailable(fromPath)) {
             return isImportablePathPnp(fromPath, toPath);
         }
         else {
