@@ -912,14 +912,13 @@ namespace ts.codefix {
      * that the runtime has already been executed).
      * @internal
      */
-    function isPnpAvailable(path: string) {
+    function getPnpApi(path: string) {
         // @ts-ignore
-        return process.versions.pnp && getPnpApi().findPackageLocator(`${path}/`) !== null ? true : false;
-    }
-
-    function getPnpApi() {
-        // @ts-ignore
-        return require("pnpapi");
+        const {findPnpApi} = require("module");
+        if (findPnpApi === undefined) {
+            return undefined;
+        }
+        return findPnpApi(`${path}/`);
     }
 
     /**
@@ -936,7 +935,7 @@ namespace ts.codefix {
     }
 
     function isImportablePathPnp(fromPath: string, toPath: string): boolean {
-        const pnpApi = getPnpApi();
+        const pnpApi = getPnpApi(fromPath);
 
         const fromLocator = pnpApi.findPackageLocator(fromPath);
         const toLocator = pnpApi.findPackageLocator(toPath);
@@ -953,7 +952,7 @@ namespace ts.codefix {
     }
 
     function isImportablePath(fromPath: string, toPath: string, getCanonicalFileName: GetCanonicalFileName, globalCachePath?: string): boolean {
-        if (isPnpAvailable(fromPath)) {
+        if (getPnpApi(fromPath)) {
             return isImportablePathPnp(fromPath, toPath);
         }
         else {

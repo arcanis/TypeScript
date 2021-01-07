@@ -644,7 +644,7 @@ namespace ts {
                     break;
                 case ConfigFileProgramReloadLevel.Resolutions:
                     perfLogger.logStartUpdateProgram("SynchronizeProgramWithResolutions");
-                    synchronizeProgram(true);
+                    synchronizeProgram(/*forceAllFilesAsInvalidated*/ true);
                     break;
                 default:
                     perfLogger.logStartUpdateProgram("SynchronizeProgram");
