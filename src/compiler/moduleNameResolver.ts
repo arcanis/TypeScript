@@ -1355,7 +1355,15 @@ namespace ts {
 
     function loadModuleFromSpecificNodeModulesDirectory(extensions: Extensions, moduleName: string, nodeModulesDirectory: string, nodeModulesDirectoryExists: boolean, state: ModuleResolutionState): Resolved | undefined {
         const candidate = normalizePath(combinePaths(nodeModulesDirectory, moduleName));
+        return loadModuleFromSpecificNodeModulesDirectoryImpl(extensions, moduleName, nodeModulesDirectory, nodeModulesDirectoryExists, state, candidate, undefined, undefined);
+    }
 
+    function loadModuleFromPnpResolution(extensions: Extensions, packageDirectory: string, rest: string, state: ModuleResolutionState): Resolved | undefined {
+        const candidate = normalizePath(combinePaths(packageDirectory, rest));
+        return loadModuleFromSpecificNodeModulesDirectoryImpl(extensions, undefined, undefined, true, state, candidate, rest, packageDirectory);
+    }
+
+    function loadModuleFromSpecificNodeModulesDirectoryImpl(extensions: Extensions, moduleName: string | undefined, nodeModulesDirectory: string | undefined, nodeModulesDirectoryExists: boolean, state: ModuleResolutionState, candidate: string, rest: string | undefined, packageDirectory: string | undefined): Resolved | undefined {
         // First look for a nested package.json, as in `node_modules/foo/bar/package.json`.
         let packageInfo = getPackageJsonInfo(candidate, !nodeModulesDirectoryExists, state);
         if (packageInfo) {
@@ -1389,9 +1397,10 @@ namespace ts {
             return withPackageId(packageInfo, pathAndExtension);
         };
 
-        const { packageName, rest } = parsePackageName(moduleName);
+        let packageName: string;
+        if (rest === undefined) ({ packageName, rest } = parsePackageName(moduleName!));
         if (rest !== "") { // If "rest" is empty, we just did this search above.
-            const packageDirectory = combinePaths(nodeModulesDirectory, packageName);
+            if (packageDirectory === undefined) packageDirectory = combinePaths(nodeModulesDirectory!, packageName!);
 
             // Don't use a "types" or "main" from here because we're not loading the root, but a subdirectory -- just here for the packageId and path mappings.
             packageInfo = getPackageJsonInfo(packageDirectory, !nodeModulesDirectoryExists, state);
@@ -1608,7 +1617,7 @@ namespace ts {
 
         const packageResolution = loadPnpPackageResolution(packageName, containingDirectory);
         const packageFullResolution = packageResolution
-            ? nodeLoadModuleByRelativeName(extensions, combinePaths(packageResolution, rest), /*onlyRecordFailures*/ false, state, /*considerPackageJson*/ true)
+            ? loadModuleFromPnpResolution(extensions, packageResolution, rest, state)
             : undefined;
 
         let resolved;
@@ -1618,7 +1627,7 @@ namespace ts {
         else if (extensions === Extensions.TypeScript || extensions === Extensions.DtsOnly) {
             const typePackageResolution = loadPnpTypePackageResolution(packageName, containingDirectory);
             const typePackageFullResolution = typePackageResolution
-                ? nodeLoadModuleByRelativeName(Extensions.DtsOnly, combinePaths(typePackageResolution, rest), /*onlyRecordFailures*/ false, state, /*considerPackageJson*/ true)
+                ? loadModuleFromPnpResolution(Extensions.DtsOnly, typePackageResolution, rest, state)
                 : undefined;
 
             if (typePackageFullResolution) {
