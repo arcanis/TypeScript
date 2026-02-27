@@ -6435,7 +6435,7 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
                     if (name.includes("/node_modules/")) {
                         context.encounteredError = true;
                         if (context.tracker.reportLikelyUnsafeImportRequiredError) {
-                            context.tracker.reportLikelyUnsafeImportRequiredError(name);
+                            context.tracker.reportLikelyUnsafeImportRequiredError(name, nodeSymbol ? unescapeLeadingUnderscores(nodeSymbol.escapedName) : undefined);
                         }
                     }
                     if (name !== originalName) {
@@ -8717,7 +8717,7 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
                         // since declaration files with these kinds of references are liable to fail when published :(
                         context.encounteredError = true;
                         if (context.tracker.reportLikelyUnsafeImportRequiredError) {
-                            context.tracker.reportLikelyUnsafeImportRequiredError(oldSpecifier, chain.length > 1 ? unescapeLeadingUnderscores(symbol.escapedName) : undefined);
+                            context.tracker.reportLikelyUnsafeImportRequiredError(oldSpecifier, unescapeLeadingUnderscores(symbol.escapedName));
                         }
                     }
                 }
