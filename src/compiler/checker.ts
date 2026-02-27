@@ -6434,8 +6434,8 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
                     }
                     if (name.includes("/node_modules/")) {
                         context.encounteredError = true;
-                        if (context.tracker.reportLikelyUnsafeImportRequiredError) {
-                            context.tracker.reportLikelyUnsafeImportRequiredError(name, nodeSymbol ? unescapeLeadingUnderscores(nodeSymbol.escapedName) : undefined);
+                        if (context.tracker.reportLikelyUnsafeImportRequiredError && nodeSymbol) {
+                            context.tracker.reportLikelyUnsafeImportRequiredError(name, unescapeLeadingUnderscores(nodeSymbol.escapedName));
                         }
                     }
                     if (name !== originalName) {
@@ -54370,7 +54370,7 @@ class SymbolTrackerImpl implements SymbolTracker {
         }
     }
 
-    reportLikelyUnsafeImportRequiredError(specifier: string, symbolName?: string): void {
+    reportLikelyUnsafeImportRequiredError(specifier: string, symbolName: string): void {
         if (this.inner?.reportLikelyUnsafeImportRequiredError) {
             this.onDiagnosticReported();
             this.inner.reportLikelyUnsafeImportRequiredError(specifier, symbolName);

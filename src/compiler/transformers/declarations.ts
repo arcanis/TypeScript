@@ -408,9 +408,9 @@ export function transformDeclarations(context: TransformationContext): Transform
         }
     }
 
-    function reportLikelyUnsafeImportRequiredError(specifier: string, symbolName?: string) {
+    function reportLikelyUnsafeImportRequiredError(specifier: string, symbolName: string) {
         if (errorNameNode || errorFallbackNode) {
-            context.addDiagnostic(createDiagnosticForNode((errorNameNode || errorFallbackNode)!, Diagnostics.The_inferred_type_of_0_cannot_be_named_without_a_reference_to_2_from_1_This_is_likely_not_portable_A_type_annotation_is_necessary, errorDeclarationNameWithFallback(), specifier, symbolName ?? specifier));
+            context.addDiagnostic(createDiagnosticForNode((errorNameNode || errorFallbackNode)!, Diagnostics.The_inferred_type_of_0_cannot_be_named_without_a_reference_to_2_from_1_This_is_likely_not_portable_A_type_annotation_is_necessary, errorDeclarationNameWithFallback(), specifier, symbolName));
         }
     }
 
